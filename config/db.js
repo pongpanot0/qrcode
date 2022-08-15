@@ -5,7 +5,6 @@ var connection = ({
   password:`${process.env.db_password}`,
   database:`${process.env.db_database}`,
   port:`${process.env.db_port}`,
-  connectionLimit: 1000,
 })
 
 let db=null;
