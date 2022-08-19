@@ -50,7 +50,6 @@ exports.createdevice = async (req, res) => {
       let devSn = req.body.devSn;
       let name = req.body.name;
       let accDoorNo = req.body.accDoorNo;
-      let positionuuid = req.body.positionuuid;
 
       let count = `SELECT COUNT(device_devSn)  AS name2 FROM device WHERE device_devSn='${devSn}'`;
       db.query(count, async (err, result) => {
@@ -58,7 +57,10 @@ exports.createdevice = async (req, res) => {
           console.log(err);
         }
         if (result[0].name2 >= 1) {
-          console.log("มี Device อยู่แล้ว");
+          res.send({
+            status: 400,
+            data: "มี Device อยู่แล้ว",
+          });
         }
         if (result[0].name2 == 0) {
           await axios
@@ -67,6 +69,12 @@ exports.createdevice = async (req, res) => {
             )
             .then(async (result) => {
               let key = result.data.data.accessToken;
+              const URI = `${process.env.thinmoo}/devDevice/extapi/add?accessToken=${key}&devSn=${devSn}&extCommunityUuid=${uuid}&name=${name}&accDoorNo=${accDoorNo}`;
+              const encodedURI = encodeURI(URI);
+              await axios.post(encodedURI).then((result) => {
+                console.log(result.data);
+                res.send(result.data);
+              });
               let createdevice = `insert into device (device_devSn,device_name,create_by) values ('${devSn}','${name}','${create_by}')`;
               db.query(createdevice, async (err, result) => {
                 if (err) {
@@ -74,14 +82,6 @@ exports.createdevice = async (req, res) => {
                 }
                 if (result) {
                   console.log(result);
-                  await axios
-                    .post(
-                      `${process.env.thinmoo}/devDevice/extapi/add?accessToken=${key}&devSn=${devSn}&extCommunityUuid=${uuid}&name=${name}&accDoorNo=${accDoorNo}&positionuuid=${positionuuid}`
-                    )
-                    .then((result) => {
-                      console.log(result.data);
-                      res.send(result.data);
-                    });
                 }
               });
             });
@@ -113,7 +113,7 @@ exports.removeDevice = async (req, res) => {
             }
             if (result) {
               console.log(result);
-        
+
               await axios
                 .post(
                   `${process.env.thinmoo}/devDevice/extapi/delete?accessToken=${key}&devSns=${devSn}&extCommunityUuid=${uuid}`

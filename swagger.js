@@ -15,7 +15,7 @@ const outputFile = './swagger_output.json'
 fs.readdirSync("routes").forEach(function (file) {
 if (file[0] == ".") return;
 
-const endpointsFiles = ["./routes/" + 'auth.js',"./routes/" + 'buildingunit.js',"./routes/" + 'getapi.js',"./routes/" + 'room.js',"./routes/" + 'device.js']
+const endpointsFiles = ["./routes/" + 'auth.js',"./routes/" + 'buildingunit.js',"./routes/" + 'getapi.js',"./routes/" + 'room.js',"./routes/" + 'device.js',"./routes/"+'visitor.js']
 
 swaggerAutogen(outputFile, endpointsFiles,doc)
 });

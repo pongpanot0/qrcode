@@ -33,6 +33,9 @@
                 "email": {
                   "example": "any"
                 },
+                "position": {
+                  "example": "any"
+                },
                 "password": {
                   "example": "any"
                 }
@@ -77,23 +80,29 @@
         }
       }
     },
-    "/createbuild": {
+    "/createbuild/{company_id}": {
       "post": {
         "description": "",
         "parameters": [
+          {
+            "name": "company_id",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
           {
             "name": "body",
             "in": "body",
             "schema": {
               "type": "object",
               "properties": {
-                "extCommunityUuid": {
-                  "example": "any"
-                },
                 "name": {
                   "example": "any"
                 },
                 "code": {
+                  "example": "any"
+                },
+                "create_by": {
                   "example": "any"
                 }
               }
@@ -125,12 +134,18 @@
         }
       }
     },
-    "/getonebuildunit/{id}": {
+    "/getonebuildunit/{company_id}/{uuids}": {
       "get": {
         "description": "",
         "parameters": [
           {
-            "name": "id",
+            "name": "company_id",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "uuids",
             "in": "path",
             "required": true,
             "type": "string"
@@ -143,10 +158,23 @@
         }
       }
     },
-    "/createdevice": {
-      "get": {
+    "/deletebuilding/{id}/{uuid}": {
+      "delete": {
         "description": "",
-        "parameters": [],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "uuid",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ],
         "responses": {
           "200": {
             "description": "OK"
@@ -198,26 +226,50 @@
         }
       }
     },
-    "/createRoom": {
+    "/getcommunity/{company_id}": {
+      "get": {
+        "description": "",
+        "parameters": [
+          {
+            "name": "company_id",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/createRoom/{company_id}": {
       "post": {
         "description": "",
         "parameters": [
+          {
+            "name": "company_id",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
           {
             "name": "body",
             "in": "body",
             "schema": {
               "type": "object",
               "properties": {
-                "room_extCommunityUuid": {
-                  "example": "any"
-                },
-                "room_uuid": {
-                  "example": "any"
-                },
                 "room_buildingUuid": {
                   "example": "any"
                 },
                 "room_name": {
+                  "example": "any"
+                },
+                "code": {
+                  "example": "any"
+                },
+                "created_by": {
                   "example": "any"
                 }
               }
@@ -249,12 +301,186 @@
         }
       }
     },
+    "/deleteroom/{company_id}/{uuids}": {
+      "delete": {
+        "description": "",
+        "parameters": [
+          {
+            "name": "company_id",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "uuids",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/getoneRoom/{company_id}/{uuids}": {
+      "get": {
+        "description": "",
+        "parameters": [
+          {
+            "name": "company_id",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "uuids",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
     "/getdeviceuuid/{company_id}": {
       "get": {
         "description": "",
         "parameters": [
           {
             "name": "company_id",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/createdevice/{company_id}": {
+      "post": {
+        "description": "",
+        "parameters": [
+          {
+            "name": "company_id",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "create_by": {
+                  "example": "any"
+                },
+                "devSn": {
+                  "example": "any"
+                },
+                "name": {
+                  "example": "any"
+                },
+                "accDoorNo": {
+                  "example": "any"
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/removeDevice/{company_id}/{devSn}": {
+      "delete": {
+        "description": "",
+        "parameters": [
+          {
+            "name": "company_id",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "devSn",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/createVisitor/{id}": {
+      "post": {
+        "description": "",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "devsns": {
+                  "example": "any"
+                },
+                "usableCount": {
+                  "example": "any"
+                },
+                "startDate": {
+                  "example": "any"
+                },
+                "endDate": {
+                  "example": "any"
+                },
+                "visitor_name": {
+                  "example": "any"
+                },
+                "created_by": {
+                  "example": "any"
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/getVisitor/{id}": {
+      "get": {
+        "description": "",
+        "parameters": [
+          {
+            "name": "id",
             "in": "path",
             "required": true,
             "type": "string"
