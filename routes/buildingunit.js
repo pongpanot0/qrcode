@@ -4,5 +4,5 @@ module.exports = function (app) {
   app.get("/getbuild/:company_id", building.getbuildunit);
   app.get("/getonebuildunit/:company_id/:uuids", building.getonebuildunit);
   app.delete("/deletebuilding/:id/:uuid", building.deletebuilding);
-  
+  app.post('/exportsBuilding/:company_id',building.exportsBuilding)
 };

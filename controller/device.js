@@ -1,5 +1,6 @@
 const axios = require("axios");
 const db = require("../config/db");
+const XLSX = require("xlsx");
 exports.getDevice = async (req, res) => {
   let company_id = req.params.company_id;
   let getbuild = `select * from company where company_id = ${company_id}`;
@@ -124,6 +125,306 @@ exports.removeDevice = async (req, res) => {
                 });
             }
           });
+        });
+    }
+  });
+};
+exports.exportsDevice = async (req, res) => {
+  let company_id = req.params.company_id;
+  let getbuild = `select * from company where company_id = ${company_id}`;
+  db.query(getbuild, async (err, result) => {
+    if (err) {
+      res.send(err);
+    }
+    if (result.length <= 0) {
+      res.send("มีบางอย่างผิดพลาด");
+    }
+    if (result.length > 0) {
+      let uuid = result[0].company_uuid;
+      await axios
+        .get(
+          `${process.env.thinmoo}/platCompany/extapi/getAccessToken?appId=7ba40b7c8f88492aa8afe5aad19fc0a4&appSecret=7cd85e69b6a18e62985f463fa67c4088`
+        )
+        .then(async (result) => {
+          let AccessToken = result.data.data.accessToken;
+          await axios
+            .get(
+              `${process.env.thinmoo}/devDevice/extapi/list?accessToken=${AccessToken}&extCommunityUuid=${uuid}`
+            )
+            .then(async (result) => {
+              console.log(result.data.data.list);
+              const output = result.data.data.list;
+              const data = [];
+              for (let i = 0; i < output.length; i++) {
+                const jsonData = [
+                  {
+                    name: output[i].name,
+                    deviceModelName: output[i].deviceModelName,
+                    positionFullName: output[i].positionFullName,
+                  },
+                ];
+                data.push(...jsonData);
+              }
+              const convertJsonToexcel2 = () => {
+                const workSheet = XLSX.utils.json_to_sheet(data);
+                const workBook = XLSX.utils.book_new();
+
+                XLSX.utils.book_append_sheet(workBook, workSheet, "HouseData");
+                //binary buffer
+                XLSX.write(workBook, {
+                  bookType: "xlsx",
+                  type: "buffer",
+                });
+                //binary string
+                const fs = require("fs");
+                const filename = "users.xlsx";
+                const wb_opts = { bookType: "xlsx", type: "binary" }; // workbook options
+                XLSX.writeFile(workBook, filename, wb_opts); // write workbook file
+                const stream = fs.createReadStream(filename); // create read stream
+                stream.on("open", function () {
+                  // This just pipes the read stream to the response object (which goes to the client)
+                  stream.pipe(res);
+                });
+              };
+              convertJsonToexcel2();
+              return;
+            })
+            .catch(function (error) {
+              console.log(error);
+            });
+        })
+        .catch(function (error) {
+          console.log(error);
+        });
+    }
+  });
+};
+exports.getDeviceLenght = async (req, res) => {
+  let company_id = req.params.company_id;
+  let getbuild = `select * from company where company_id = ${company_id}`;
+  db.query(getbuild, async (err, result) => {
+    console.log(result);
+    if (err) {
+      res.send(err);
+    }
+    if (result.length <= 0) {
+      res.send("มีบางอย่างผิดพลาด");
+    }
+    if (result.length > 0) {
+      let uuid = result[0].company_uuid;
+      await axios
+        .get(
+          `${process.env.thinmoo}/platCompany/extapi/getAccessToken?appId=7ba40b7c8f88492aa8afe5aad19fc0a4&appSecret=7cd85e69b6a18e62985f463fa67c4088`
+        )
+        .then(async (result) => {
+          let AccessToken = result.data.data.accessToken;
+          await axios
+            .get(
+              `${process.env.thinmoo}/devDevice/extapi/list?accessToken=${AccessToken}&extCommunityUuid=${uuid}`
+            )
+            .then(async (result) => {
+              res.send(result.data.data);
+            })
+            .catch(function (error) {
+              console.log(error);
+            });
+        })
+        .catch(function (error) {
+          console.log(error);
+        });
+    }
+  });
+};
+exports.openDevice = async (req, res) => {
+  let company_id = req.params.company_id;
+  let getbuild = `select * from company where company_id = ${company_id}`;
+  const devSn = req.params.devSn;
+  db.query(getbuild, async (err, result) => {
+    console.log(result);
+    if (err) {
+      res.send(err);
+    }
+    if (result.length <= 0) {
+      res.send("มีบางอย่างผิดพลาด");
+    }
+    if (result.length > 0) {
+      let uuid = result[0].company_uuid;
+      await axios
+        .get(
+          `${process.env.thinmoo}/platCompany/extapi/getAccessToken?appId=7ba40b7c8f88492aa8afe5aad19fc0a4&appSecret=7cd85e69b6a18e62985f463fa67c4088`
+        )
+        .then(async (result) => {
+          let AccessToken = result.data.data.accessToken;
+          await axios
+            .get(
+              `${process.env.thinmoo}/sqDoor/extapi/remoteOpenDoor?accessToken=${AccessToken}&extCommunityUuid=${uuid}&devSn=${devSn}`
+            )
+            .then(async (result) => {
+              res.send({
+                status: 200,
+                data: result.data,
+              });
+              return;
+            })
+            .catch(function (error) {
+              console.log(error);
+            });
+        })
+        .catch(function (error) {
+          console.log(error);
+        });
+    }
+  });
+};
+exports.ConfigDevice = async (req, res) => {
+  let company_id = req.params.company_id;
+  let getbuild = `select * from company where company_id = ${company_id}`;
+  const devSn = req.params.devSn;
+  const devAccSupperPassword = req.params.devAccSupperPassword;
+  db.query(getbuild, async (err, result) => {
+    console.log(result);
+    if (err) {
+      res.send(err);
+    }
+    if (result.length <= 0) {
+      res.send("มีบางอย่างผิดพลาด");
+    }
+    if (result.length > 0) {
+      let uuid = result[0].company_uuid;
+      await axios
+        .get(
+          `${process.env.thinmoo}/platCompany/extapi/getAccessToken?appId=7ba40b7c8f88492aa8afe5aad19fc0a4&appSecret=7cd85e69b6a18e62985f463fa67c4088`
+        )
+        .then(async (result) => {
+          let AccessToken = result.data.data.accessToken;
+          await axios
+            .get(
+              `${process.env.thinmoo}/devDevice/extapi/updateParams?accessToken=${AccessToken}&extCommunityUuid=${uuid}&devSn=${devSn}&devAccSupperPassword=${devAccSupperPassword}`
+            )
+            .then(async (result) => {
+              res.send({
+                status: 200,
+                data: result.data,
+              });
+              return;
+            })
+            .catch(function (error) {
+              console.log(error);
+            });
+        })
+        .catch(function (error) {
+          console.log(error);
+        });
+    }
+  });
+};
+exports.getLogDevice = async (req, res) => {
+  let company_id = req.params.company_id;
+  let getbuild = `select * from company where company_id = ${company_id}`;
+  db.query(getbuild, async (err, result) => {
+    console.log(result);
+    if (err) {
+      res.send(err);
+    }
+    if (result.length <= 0) {
+      res.send("มีบางอย่างผิดพลาด");
+    }
+    if (result.length > 0) {
+      let uuid = result[0].company_uuid;
+      await axios
+        .get(
+          `${process.env.thinmoo}/platCompany/extapi/getAccessToken?appId=7ba40b7c8f88492aa8afe5aad19fc0a4&appSecret=7cd85e69b6a18e62985f463fa67c4088`
+        )
+        .then(async (result) => {
+          let AccessToken = result.data.data.accessToken;
+          await axios
+            .get(
+              `${process.env.thinmoo}/normalOpenDoorlog/extapi/list?accessToken=${AccessToken}&extCommunityUuid=${uuid}&pageSize=9999`
+            )
+            .then(async (result) => {
+              res.send({
+                status: 200,
+                data: result.data,
+              });
+              return;
+            })
+            .catch(function (error) {
+              console.log(error);
+            });
+        })
+        .catch(function (error) {
+          console.log(error);
+        });
+    }
+  });
+};
+exports.exportslogdevice = async (req, res) => {
+  let company_id = req.params.company_id;
+  let getbuild = `select * from company where company_id = ${company_id}`;
+  db.query(getbuild, async (err, result) => {
+    if (err) {
+      res.send(err);
+    }
+    if (result.length <= 0) {
+      res.send("มีบางอย่างผิดพลาด");
+    }
+    if (result.length > 0) {
+      let uuid = result[0].company_uuid;
+      await axios
+        .get(
+          `${process.env.thinmoo}/platCompany/extapi/getAccessToken?appId=7ba40b7c8f88492aa8afe5aad19fc0a4&appSecret=7cd85e69b6a18e62985f463fa67c4088`
+        )
+        .then(async (result) => {
+          let AccessToken = result.data.data.accessToken;
+          await axios
+            .get(
+              `${process.env.thinmoo}/normalOpenDoorlog/extapi/list?accessToken=${AccessToken}&extCommunityUuid=${uuid}&pageSize=9999`
+            )
+            .then(async (result) => {
+              console.log(result.data.data.list);
+              const output = result.data.data.list;
+              const data = [];
+              for (let i = 0; i < output.length; i++) {
+                const jsonData = [
+                  {
+                    name: output[i].name,
+                    deviceModelName: output[i].deviceModelName,
+                    positionFullName: output[i].positionFullName,
+                    eventTime:output[i].eventTime
+                  },
+                ];
+                data.push(...jsonData);
+              }
+              const convertJsonToexcel2 = () => {
+                const workSheet = XLSX.utils.json_to_sheet(data);
+                const workBook = XLSX.utils.book_new();
+
+                XLSX.utils.book_append_sheet(workBook, workSheet, "HouseData");
+                //binary buffer
+                XLSX.write(workBook, {
+                  bookType: "xlsx",
+                  type: "buffer",
+                });
+                //binary string
+                const fs = require("fs");
+                const filename = "users.xlsx";
+                const wb_opts = { bookType: "xlsx", type: "binary" }; // workbook options
+                XLSX.writeFile(workBook, filename, wb_opts); // write workbook file
+                const stream = fs.createReadStream(filename); // create read stream
+                stream.on("open", function () {
+                  // This just pipes the read stream to the response object (which goes to the client)
+                  stream.pipe(res);
+                });
+              };
+              convertJsonToexcel2();
+              return;
+            })
+            .catch(function (error) {
+              console.log(error);
+            });
+        })
+        .catch(function (error) {
+          console.log(error);
         });
     }
   });
