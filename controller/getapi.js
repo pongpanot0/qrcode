@@ -36,7 +36,7 @@ exports.opendoorwithapp = async (req, res) => {
       console.log(err);
     }
     if (result) {
-      console.log(result[0].uuid);
+  
       let uuid = result[0].uuid;
       let devSn = 4280784269;
       await axios
@@ -64,7 +64,7 @@ exports.createqrcodevisitor = async (req, res) => {
       console.log(err);
     }
     if (result) {
-      console.log(result[0].uuid);
+  
       let uuid = result[0].uuid;
       let devSn = 4280784269;
       let usableCount = req.body.usableCount;
@@ -92,7 +92,7 @@ exports.createqrcodeemployee = async (req, res) => {
       console.log(err);
     }
     if (result) {
-      console.log(result[0].uuid);
+
       let uuid = result[0].uuid;
       let devSn = 4280784269;
       let usableCount = req.body.usableCount;

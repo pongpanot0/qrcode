@@ -11,6 +11,7 @@ exports.createVisitor = async (req, res) => {
   let startDate = req.body.startDate;
   let endDate = req.body.endDate;
   let visitor_name = req.body.visitor_name;
+  let visipeople = req.body.visipeople
   let created_by = req.body.created_by;
   console.log(startDate);
   console.log(endDate);
@@ -41,14 +42,14 @@ exports.createVisitor = async (req, res) => {
             )
 
             .then(async (result) => {
-              console.log(result.data);
+           
               let qrcode = result.data.data.qrCode;
               let tempPwd = result.data.data.tempPwd;
-              let saveLog = `insert into visitor_log (company_id,device_devSn,qrcode,start,end,usableCount,visitor_name,tempPwd,created_by) value (${id},${devsns},'${qrcode}','${moment(
+              let saveLog = `insert into visitor_log (company_id,device_devSn,qrcode,start,end,usableCount,visitor_name,tempPwd,created_by,visipeople) value (${id},${devsns},'${qrcode}','${moment(
                 startDate
               ).format("YYYY-MM-DD HH:mm:ss")}','${moment(endDate).format(
                 "YYYY-MM-DD HH:mm:ss"
-              )}','${usableCount}','${visitor_name}','${tempPwd}','${created_by}')`;
+              )}','${usableCount}','${visitor_name}','${tempPwd}','${created_by}','${visipeople}')`;
               db.query(saveLog, (err, result) => {
                 if (err) {
                   console.log(err);

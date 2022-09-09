@@ -1,7 +1,7 @@
 const db = require("../config/db");
 const { v4: uuidv4 } = require("uuid");
 const axios = require("axios");
-const XLSX = require('xlsx')
+const XLSX = require("xlsx");
 exports.createbuild = async (req, res) => {
   let uuid = uuidv4();
   let name = req.body.name;
@@ -31,7 +31,6 @@ exports.createbuild = async (req, res) => {
               const URI = `${process.env.thinmoo}/sqBuilding/extapi/add?extCommunityUuid=${extCommunityUuid}&name=${name}&uuid=${uuid}&code=${code}&accessToken=${accessToken}`;
               const encodedURI = encodeURI(URI);
               await axios.post(encodedURI).then(async (result) => {
-                console.log(result.data);
                 res.send(result.data);
               });
             });
@@ -70,7 +69,7 @@ exports.getbuildunit = async (req, res) => {
 };
 exports.getonebuildunit = async (req, res) => {
   let company_id = req.params.company_id;
-  let uuids = req.params.uuids
+  let uuids = req.params.uuids;
   let getbuild = `select * from company where company_id = ${company_id}`;
   db.query(getbuild, async (err, result) => {
     if (err) {
@@ -78,23 +77,21 @@ exports.getonebuildunit = async (req, res) => {
     }
     if (result) {
       let company_uuid = result[0].company_uuid;
-  
+
       await axios
         .get(
           `${process.env.thinmoo}/platCompany/extapi/getAccessToken?appId=7ba40b7c8f88492aa8afe5aad19fc0a4&appSecret=7cd85e69b6a18e62985f463fa67c4088`
         )
         .then(async (result) => {
-          console.log(result)
           let accessToken = result.data.data.accessToken;
           await axios
             .get(
               `${process.env.thinmoo}/sqBuilding/extapi/get?accessToken=${accessToken}&extCommunityUuid=${company_uuid}&uuid=${uuids}`
             )
             .then(async (result) => {
-              console.log(result)
               let coludresult = result.data;
               res.send(coludresult);
-            })
+            });
         });
     }
   });
@@ -109,7 +106,6 @@ exports.deletebuilding = async (req, res) => {
       console.log(err);
     }
     if (result) {
-
       let extCommunityUuid = result[0].company_uuid;
       await axios
         .get(
@@ -122,7 +118,6 @@ exports.deletebuilding = async (req, res) => {
               `${process.env.thinmoo}/sqBuilding/extapi/delete?accessToken=${accessToken}&extCommunityUuid=${extCommunityUuid}&uuids=${uuid}`
             )
             .then(async (result) => {
-              console.log(result.data)
               res.send({
                 data: result.data,
               });
@@ -151,8 +146,8 @@ exports.exportsBuilding = async (req, res) => {
               `${process.env.thinmoo}/sqBuilding/extapi/list?accessToken=${accessToken}&extCommunityUuid=${uuid}`
             )
             .then(async (result) => {
-              const output = result.data.data.list
-              console.log(result.data.data.list)
+              const output = result.data.data.list;
+
               const data = [];
               for (let i = 0; i < output.length; i++) {
                 const jsonData = [
@@ -187,9 +182,92 @@ exports.exportsBuilding = async (req, res) => {
               };
               convertJsonToexcel2();
               return;
-           
             });
         });
     }
   });
 };
+exports.exportsBuilding2query = async (req, res) => {
+  let company_id = req.params.company_id;
+  let getbuild = `select * from company where company_id = ${company_id}`;
+  const data1 = [];
+  const data2 = [];
+  db.query(getbuild, async (err, result) => {
+    if (err) {
+      console.log(err);
+    }
+    if (result) {
+      let company_uuid = result[0].company_uuid;
+
+      await axios
+        .get(
+          `${process.env.thinmoo}/platCompany/extapi/getAccessToken?appId=7ba40b7c8f88492aa8afe5aad19fc0a4&appSecret=7cd85e69b6a18e62985f463fa67c4088`
+        )
+        .then(async (result) => {
+          let accessToken = result.data.data.accessToken;
+          await axios
+            .get(
+              `${process.env.thinmoo}/sqBuilding/extapi/list?accessToken=${accessToken}&extCommunityUuid=${company_uuid}`
+            )
+            .then(async (result) => {
+              await axios
+                .get(
+                  `${process.env.thinmoo}/sqRoom/extapi/list?accessToken=${accessToken}&extCommunityUuid=${company_uuid}&pageSize=1000`
+                )
+                .then(async (result) => {
+                  let coludresult2 = result.data.data.list;
+
+                  const binInfoData = coludresult2.map((doc) => doc);
+                  data1.push(...binInfoData);
+                });
+
+              let coludresult = result.data;
+              const binData = coludresult.data.list.map((doc) => ({
+                id: doc.id,
+                ...doc,
+              }));
+              data2.push(...binData);
+            });
+
+          //data2communuty
+          //communityId46020
+
+          const data = data2.map((bin) => {
+            const det = data1.filter((doc) => doc.buildingId === bin.id);
+
+            return { ...bin, det };
+          });
+          res.send(data);
+        });
+    }
+  });
+};
+exports.getcommunity = async (req, res) => {
+  let company_id = req.params.company_id;
+  let getbuild = `select * from company where company_id = ${company_id}`;
+  db.query(getbuild, async (err, result) => {
+    if (err) {
+      console.log(err);
+    }
+    if (result) {
+      let company_uuid = result[0].company_uuid;
+
+      await axios
+        .get(
+          `${process.env.thinmoo}/platCompany/extapi/getAccessToken?appId=7ba40b7c8f88492aa8afe5aad19fc0a4&appSecret=7cd85e69b6a18e62985f463fa67c4088`
+        )
+        .then(async (result) => {
+          let accessToken = result.data.data.accessToken;
+          await axios
+            .get(
+              `${process.env.thinmoo}//sqCommunity/extapiAdmin/get?accessToken=${accessToken}&uuid=${company_uuid}`
+            )
+            .then(async (result) => {
+              let coludresult = result.data;
+              res.send(coludresult);
+            });
+        });
+    }
+  });
+}
+

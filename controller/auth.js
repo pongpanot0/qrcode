@@ -76,7 +76,7 @@ exports.login = async (req, res) => {
   db.query(
     `select * from user  WHERE username = '${email}' and mobile = 0`,
     async (err, result) => {
-      console.log(result);
+  
       if (err) {
         res.send({
           status: 400,

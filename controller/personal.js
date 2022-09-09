@@ -54,12 +54,27 @@ exports.getData = async (req, res) => {
     if (err) {
       console.log(err);
     }
-    if (result.length < 0) {
+    if (result.length <= 0) {
       res.send({
         status: 400,
       });
     }
     if (result.length > 0) {
+      res.send({
+        status: 200,
+        data: result,
+      });
+    }
+  });
+};
+exports.Deletepersonal = async (req, res) => {
+  const id = req.params.id;
+  let get = `delete from user where user_id='${id}'`;
+  db.query(get, (err, result) => {
+    if (err) {
+      console.log(err);
+    }
+    if (result) {
       res.send({
         status: 200,
         data: result,

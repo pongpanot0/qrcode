@@ -12,4 +12,12 @@ module.exports = function (app) {
   );
   app.get("/getLogDevice/:company_id", device.getLogDevice);
   app.post("/exportslogdevice/:company_id", device.exportslogdevice);
+  app.post("/creategroupdevice/:company_id", device.devicegroup);
+  app.get("/getdevicegroup/:id", device.getdevicegroup);
+  app.get("/getdevicegroupcompanyid/:id", device.getdevicegroupcompanyid);
+  app.post("/deletepermisiion/:id", device.deletepermisiion);
+  app.post("/addpermision", device.addpermision);
+  app.post("/deletepermisiionuser/:id", device.deletepermisiionuser);
+
+  
 };

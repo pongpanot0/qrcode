@@ -32,6 +32,7 @@ exports.createRoom = async (req, res) => {
                 console.log(err);
               }
               if (result) {
+                console.log(coludresult)
                 res.send(coludresult);
               }
             });
@@ -86,7 +87,7 @@ exports.deleteroom = async (req, res) => {
           let accessToken = result.data.data.accessToken;
           await axios
             .get(
-              `${process.env.thinmoo}/sqRoom/extapi/list?accessToken=${accessToken}&extCommunityUuid=${company_uuid}&uuids=${uuids}`
+              `${process.env.thinmoo}/sqRoom/extapi/delete?accessToken=${accessToken}&extCommunityUuid=${company_uuid}&uuids=${uuids}`
             )
             .then(async (result) => {
               let coludresult = result.data;
