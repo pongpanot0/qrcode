@@ -11,10 +11,9 @@ exports.createVisitor = async (req, res) => {
   let startDate = req.body.startDate;
   let endDate = req.body.endDate;
   let visitor_name = req.body.visitor_name;
-  let visipeople = req.body.visipeople
+  let visipeople = req.body.visipeople;
   let created_by = req.body.created_by;
-  console.log(startDate);
-  console.log(endDate);
+
   db.query(get, async (err, result) => {
     if (err) {
       console.log(err);
@@ -42,14 +41,15 @@ exports.createVisitor = async (req, res) => {
             )
 
             .then(async (result) => {
-           
               let qrcode = result.data.data.qrCode;
               let tempPwd = result.data.data.tempPwd;
-              let saveLog = `insert into visitor_log (company_id,device_devSn,qrcode,start,end,usableCount,visitor_name,tempPwd,created_by,visipeople) value (${id},${devsns},'${qrcode}','${moment(
+              let saveLog = `insert into visitor_log (company_id,device_devSn,qrcode,start,end,usableCount,visitor_name,tempPwd,created_by,visipeople,date) value (${id},${devsns},'${qrcode}','${moment(
                 startDate
               ).format("YYYY-MM-DD HH:mm:ss")}','${moment(endDate).format(
                 "YYYY-MM-DD HH:mm:ss"
-              )}','${usableCount}','${visitor_name}','${tempPwd}','${created_by}','${visipeople}')`;
+              )}','${usableCount}','${visitor_name}','${tempPwd}','${created_by}','${visipeople}','${moment(
+                startDate
+              ).format("YYYY-MM-DD")}')`;
               db.query(saveLog, (err, result) => {
                 if (err) {
                   console.log(err);
@@ -69,6 +69,24 @@ exports.createVisitor = async (req, res) => {
 exports.getVisitor = async (req, res) => {
   let id = req.params.id;
   let get = `select * from visitor_log where company_id = ${id}`;
+  db.query(get, async (err, result) => {
+    if (err) {
+      console.log(err);
+    }
+    if (result) {
+      res.send({
+        status: 200,
+        count: result.length,
+        data: result,
+      });
+    }
+  });
+};
+exports.getVisitorlenght = async (req, res) => {
+  let id = req.params.id;
+  let get = `select * from visitor_log where company_id = ${id} and date='${moment(new Date()).format("YYYY-MM-DD")}'`;
+  console.log(moment(new Date()).format("YYYY-MM-DD"))
+  console.log(get)
   db.query(get, async (err, result) => {
     if (err) {
       console.log(err);

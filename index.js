@@ -4,7 +4,7 @@ var app = express();
 var fs = require("fs");
 var multer = require("multer");
 require("dotenv").config();
-var upload = multer();
+
 app.use(bodyParser.json());
 const cors = require("cors");
 app.use(cors({ origin: "*" }));
@@ -24,7 +24,8 @@ app.use(
     extended: true,
   })
 );
-app.use(upload.array());
+
+
 fs.readdirSync("routes").forEach(function (file) {
   if (file[0] == ".") return;
   var routeName = file.substr(0, file.indexOf("."));

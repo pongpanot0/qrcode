@@ -18,6 +18,11 @@ module.exports = function (app) {
   app.post("/deletepermisiion/:id", device.deletepermisiion);
   app.post("/addpermision", device.addpermision);
   app.post("/deletepermisiionuser/:id", device.deletepermisiionuser);
+  app.post("/removemanyDevice/:company_id", device.removemanyDevice);
+  app.post("/exportslogdevicewithdate/:company_id/:startDateTime/:endDateTime", device.exportslogdevicewithdate);
+  app.post("/restartDevice/:company_id/:devSn", device.restartDevice);
+  
+
 
   
 };

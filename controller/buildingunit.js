@@ -44,7 +44,7 @@ exports.getbuildunit = async (req, res) => {
   let getbuild = `select * from company where company_id = ${company_id}`;
   db.query(getbuild, async (err, result) => {
     if (err) {
-      console.log(err);
+      console.log(err.message);
     }
     if (result) {
       let uuid = result[0].company_uuid;
@@ -269,5 +269,4 @@ exports.getcommunity = async (req, res) => {
         });
     }
   });
-}
-
+};
