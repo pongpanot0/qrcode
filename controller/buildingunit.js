@@ -16,7 +16,7 @@ exports.createbuild = async (req, res) => {
     }
     if (result) {
       let extCommunityUuid = result[0].company_uuid;
-      let createBuilding = `insert into building (build_extCommunityUuid,build_name,build_uuid,build_code,create_by) value ('${extCommunityUuid}','${name}','${uuid}','${code}',${create_by})`;
+      let createBuilding = `insert into building (build_extCommunityUuid,build_name,build_uuid,create_by) value ('${extCommunityUuid}','${name}','${uuid}',${create_by})`;
       db.query(createBuilding, async (err, result) => {
         if (err) {
           console.log(err);
@@ -28,7 +28,7 @@ exports.createbuild = async (req, res) => {
             )
             .then(async (result) => {
               let accessToken = result.data.data.accessToken;
-              const URI = `${process.env.thinmoo}/sqBuilding/extapi/add?extCommunityUuid=${extCommunityUuid}&name=${name}&uuid=${uuid}&code=${code}&accessToken=${accessToken}`;
+              const URI = `${process.env.thinmoo}/sqBuilding/extapi/add?extCommunityUuid=${extCommunityUuid}&name=${name}&uuid=${uuid}&accessToken=${accessToken}`;
               const encodedURI = encodeURI(URI);
               await axios.post(encodedURI).then(async (result) => {
                 res.send(result.data);

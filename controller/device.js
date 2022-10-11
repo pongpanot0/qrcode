@@ -9,7 +9,7 @@ exports.getDevice = async (req, res) => {
   let getbuild = `select * from company where company_id = ${company_id}`;
   db.query(getbuild, async (err, result) => {
     if (err) {
-      res.send(err);
+      res.send(err.data);
     }
     if (result.length <= 0) {
       res.send("มีบางอย่างผิดพลาด");
@@ -30,11 +30,11 @@ exports.getDevice = async (req, res) => {
               res.send(result.data);
             })
             .catch(function (error) {
-              console.log(error);
+              console.log(error.data);
             });
         })
         .catch(function (error) {
-          console.log(error);
+          console.log(error.data);
         });
     }
   });
@@ -51,8 +51,7 @@ exports.createdevice = async (req, res) => {
       let uuid = result[0].company_uuid;
       let devSn = req.body.devSn;
       let name = req.body.name;
-      let accDoorNo = req.body.accDoorNo;
-
+      let positionuuids = req.body.positionuuids;
       let count = `SELECT COUNT(device_devSn)  AS name2 FROM device WHERE device_devSn='${devSn}'`;
       db.query(count, async (err, result) => {
         if (err) {
@@ -71,18 +70,30 @@ exports.createdevice = async (req, res) => {
             )
             .then(async (result) => {
               let key = result.data.data.accessToken;
-              let positionuuids = req.body.positionuuids;
-              const URI = `${process.env.thinmoo}/devDevice/extapi/add?accessToken=${key}&devSn=${devSn}&extCommunityUuid=${uuid}&name=${name}&accDoorNo=${accDoorNo}&positionuuids=${positionuuids}`;
+
+              const URI = `${process.env.thinmoo}/devDevice/extapi/add?accessToken=${key}&devSn=${devSn}&extCommunityUuid=${uuid}&name=${name}&positionId=${positionuuids}&positionType=1`;
               const encodedURI = encodeURI(URI);
               await axios.post(encodedURI).then((result) => {
-                res.send(result.data);
-              });
-              let createdevice = `insert into device (device_devSn,device_name,create_by) values ('${devSn}','${name}','${create_by}')`;
-              db.query(createdevice, async (err, result) => {
-                if (err) {
-                  console.log(err);
+                console.log(result);
+                if (result.data.code === 10400) {
+                  res.send({
+                    status: 401,
+                    data: "มี Device อยู่แล้ว",
+                  });
                 }
-                if (result) {
+                if (result.data.code === 0) {
+                  let createdevice = `insert into device (device_devSn,device_name,create_by) values ('${devSn}','${name}','${create_by}')`;
+                  db.query(createdevice, async (err, result) => {
+                    if (err) {
+                      console.log(err);
+                    }
+                    if (result) {
+                      res.send({
+                        code: 0,
+                        data: result.data,
+                      });
+                    }
+                  });
                 }
               });
             });
@@ -132,7 +143,6 @@ exports.removemanyDevice = async (req, res) => {
   const objectArray2 = Object.entries(newObject2);
 
   objectArray2.forEach(([key, value]) => {
-    console.log(value);
     let get = `select * from company where company_id = ${company_id}`;
     db.query(get, async (err, result) => {
       if (err) {
@@ -156,9 +166,7 @@ exports.removemanyDevice = async (req, res) => {
                   .post(
                     `${process.env.thinmoo}/devDevice/extapi/delete?accessToken=${key}&devSns=${value}&extCommunityUuid=${uuid}`
                   )
-                  .then((result) => {
-                 
-                  });
+                  .then((result) => {});
               }
             });
           });
@@ -507,15 +515,13 @@ exports.exportslogdevice = async (req, res) => {
 exports.exportslogdevicewithdate = async (req, res) => {
   let company_id = req.params.company_id;
   let getbuild = `select * from company where company_id = ${company_id}`;
-  const startDateTime = moment(req.params.startDateTime,).format(
+  const startDateTime = moment(req.params.startDateTime).format(
     "YYYY-MM-DD 00:00:00"
   );
 
   const endDateTime = moment(req.params.endDateTime).format(
     "YYYY-MM-DD 00:00:00"
   );
-  console.log(startDateTime);
-  console.log(endDateTime);
   db.query(getbuild, async (err, result) => {
     if (err) {
       res.send(err);
@@ -536,7 +542,6 @@ exports.exportslogdevicewithdate = async (req, res) => {
               `${process.env.thinmoo}/normalOpenDoorlog/extapi/list?accessToken=${AccessToken}&extCommunityUuid=${uuid}&pageSize=9999&startDateTime=${startDateTime}&endDateTime=${endDateTime}`
             )
             .then(async (result) => {
-         
               const output = result.data.data.list;
               const data = [];
               for (let i = 0; i < output.length; i++) {
@@ -591,7 +596,6 @@ exports.devicegroup = async (req, res) => {
   const body = req.body;
   let created_by = "1";
   let created_at = "rest";
-  var keys = [];
 
   const newObject2 = Object.assign({}, body.targetKeys);
   const objectArray2 = Object.entries(newObject2);
@@ -668,7 +672,6 @@ exports.deletepermisiion = async (req, res) => {
         console.log(err);
       }
       if (result) {
-      
       }
     });
   });
@@ -685,7 +688,6 @@ exports.deletepermisiionuser = async (req, res) => {
         console.log(err);
       }
       if (result) {
-     
       }
     });
   });
@@ -713,7 +715,6 @@ exports.addpermision = async (req, res) => {
               console.log(err);
             }
             if (result) {
-           
               return;
             }
           });
@@ -740,12 +741,80 @@ exports.addpermision = async (req, res) => {
               console.log(err);
             }
             if (result) {
-            
               return;
             }
           });
         }
       }
     });
+  });
+};
+exports.editDevice = async (req, res) => {
+  const id = req.params.id;
+  const device_name = req.body.device_name;
+  let positionuuids = req.body.positionuuids;
+  let dele = `update device set device_name='${device_name}' where device_devSn='${id}'`;
+
+  let company_id = req.params.company_id;
+  let getbuild = `select * from company where company_id = ${company_id}`;
+  db.query(getbuild, async (err, result) => {
+    if (err) {
+      res.send(err);
+    }
+    if (result) {
+      let uuid = result[0].company_uuid;
+      await axios
+        .get(
+          `${process.env.thinmoo}/platCompany/extapi/getAccessToken?appId=7ba40b7c8f88492aa8afe5aad19fc0a4&appSecret=7cd85e69b6a18e62985f463fa67c4088`
+        )
+        .then(async (result) => {
+          let accessToken = result.data.data.accessToken;
+          const URI = `${process.env.thinmoo}/devDevice/extapi/update?accessToken=${accessToken}&extCommunityUuid=${uuid}&devSn=${id}&name=${device_name}&positionId=${positionuuids}&positionType=1`;
+          const encodedURI = encodeURI(URI);
+          axios
+            .post(encodedURI)
+            .then(async (result) => {
+              console.log(result.data);
+              db.query(dele, (err, result) => {
+                if (err) {
+                  console.log(err);
+                }
+                if (result) {
+                  res.send(result);
+                }
+              });
+            });
+        });
+    }
+  });
+};
+exports.getoneDevice = async (req, res) => {
+  const id = req.params.id;
+  const device_name = req.body.device_name;
+  let dele = `update device set device_name=${device_name} where device_devSn='${id}'`;
+
+  let company_id = req.params.company_id;
+  let getbuild = `select * from company where company_id = ${company_id}`;
+  db.query(getbuild, async (err, result) => {
+    if (err) {
+      res.send(err);
+    }
+    if (result) {
+      let uuid = result[0].company_uuid;
+      await axios
+        .get(
+          `${process.env.thinmoo}/platCompany/extapi/getAccessToken?appId=7ba40b7c8f88492aa8afe5aad19fc0a4&appSecret=7cd85e69b6a18e62985f463fa67c4088`
+        )
+        .then(async (result) => {
+          let accessToken = result.data.data.accessToken;
+          axios
+            .post(
+              `${process.env.thinmoo}/devDevice/extapi/get?accessToken=${accessToken}&extCommunityUuid=${uuid}&devSn=${id}`
+            )
+            .then(async (result) => {
+              res.send(result.data);
+            });
+        });
+    }
   });
 };

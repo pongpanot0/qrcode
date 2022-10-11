@@ -23,7 +23,7 @@ exports.createRoom = async (req, res) => {
         )
         .then(async (result) => {
           let accessToken = result.data.data.accessToken;
-          const URI = `${process.env.thinmoo}/sqRoom/extapi/add?accessToken=${accessToken}&extCommunityUuid=${company_uuid}&buildingId=${room_buildingUuid}&name=${room_name}&code=${code}&uuid=${room_uuid}`;
+          const URI = `${process.env.thinmoo}/sqRoom/extapi/add?accessToken=${accessToken}&extCommunityUuid=${company_uuid}&buildingId=${room_buildingUuid}&name=${room_name}&uuid=${room_uuid}`;
           const encodedURI = encodeURI(URI);
           await axios.post(encodedURI).then(async (result) => {
             let coludresult = result.data;

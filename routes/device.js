@@ -21,8 +21,8 @@ module.exports = function (app) {
   app.post("/removemanyDevice/:company_id", device.removemanyDevice);
   app.post("/exportslogdevicewithdate/:company_id/:startDateTime/:endDateTime", device.exportslogdevicewithdate);
   app.post("/restartDevice/:company_id/:devSn", device.restartDevice);
+  app.post("/editDevice/:id/:company_id", device.editDevice);
+  app.get("/getoneDevice/:id/:company_id", device.getoneDevice);
   
-
-
   
 };

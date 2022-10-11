@@ -75,7 +75,6 @@ exports.updateManyUser = async (req, res) => {
     if (permission3 === false) permission3 === 0;
     if (permission4 === true) permission4 === 1;
     if (permission4 === false) permission4 === 0;
-    console.log(value);
     let get = `update  user set qrcode=${permission},keycard=${permission2},bluetooth=${permission3},pin= ${permission4}  where user_id='${value}'`;
     db.query(get, (err, result) => {
       if (err) {
@@ -122,11 +121,12 @@ exports.updateUser = async (req, res) => {
 };
 exports.getData = async (req, res) => {
   const id = req.params.id;
-  let get = `select * from user where company_id='${id}'`;
+  let get = `select u.*,p.* from user u  left outer join groupuser p ON (u.user_id=p.groupuser_userid) where u.company_id='${id}'`;
   db.query(get, (err, result) => {
     if (err) {
       console.log(err);
     }
+    
     if (result.length <= 0) {
       res.send({
         status: 400,
