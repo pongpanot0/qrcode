@@ -1,6 +1,8 @@
 const device = require("../controller/device");
 module.exports = function (app) {
   app.get("/getdeviceuuid/:company_id", device.getDevice);
+  app.get("/getdeviceuuidmobile/:uuid", device.getDeviceuuid);
+  
   app.post("/createdevice/:company_id", device.createdevice);
   app.delete("/removeDevice/:company_id/:devSn", device.removeDevice);
   app.post("/getDevice/:company_id", device.exportsDevice);

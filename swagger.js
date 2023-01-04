@@ -5,7 +5,7 @@ const doc = {
     title: 'My API',
     description: 'Description',
   },
-  host: 'localhost:7200',
+  host: '119.59.97.193:7200',
   schemes: ['http'],
 };
 const swaggerUi = require('swagger-ui-express')

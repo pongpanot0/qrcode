@@ -74,7 +74,7 @@ exports.register = async (req, res) => {
 exports.login = async (req, res) => {
   let email = req.body.email;
   db.query(
-    `select * from user  WHERE username = '${email}' and mobile = 0`,
+    `select * from user  WHERE username = '${email}'`,
     async (err, result) => {
   
       if (err) {

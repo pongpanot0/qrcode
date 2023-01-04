@@ -10,6 +10,7 @@ exports.createVisitor = async (req, res) => {
   let usableCount = req.body.usableCount;
   let startDate = req.body.startDate;
   let endDate = req.body.endDate;
+  let tel_visitor = req.body.tel_visitor
   let visitor_name = req.body.visitor_name;
   let visipeople = req.body.visipeople;
   let created_by = req.body.created_by;
@@ -27,29 +28,30 @@ exports.createVisitor = async (req, res) => {
         .then(async (result) => {
           await axios
             .post(
-              `${
-                process.env.thinmoo
-              }/accVisitorTempPwd/extapi/add?accessToken=${
-                result.data.data.accessToken
+              `${process.env.thinmoo
+              }/accVisitorTempPwd/extapi/add?accessToken=${result.data.data.accessToken
               }&extCommunityUuid=${uuid}&devSns=${devsns}&usableCount=${usableCount}&startDate=${moment(
                 startDate
               )
                 .add(1, "hours")
                 .format("YYYY-MM-DD HH:mm:ss")}&endDate=${moment(endDate)
-                .add(1, "hours")
-                .format("YYYY-MM-DD HH:mm:ss")}`
+                  .add(1, "hours")
+                  .format("YYYY-MM-DD HH:mm:ss")}`
             )
 
             .then(async (result) => {
+              
+              const resdata = result.data
+              console.log(resdata.data)
               let qrcode = result.data.data.qrCode;
               let tempPwd = result.data.data.tempPwd;
-              let saveLog = `insert into visitor_log (company_id,device_devSn,qrcode,start,end,usableCount,visitor_name,tempPwd,created_by,visipeople,date) value (${id},${devsns},'${qrcode}','${moment(
+              let saveLog = `insert into visitor_log (company_id,device_devSn,qrcode,start,end,usableCount,visitor_name,tempPwd,created_by,visipeople,date,tel_visitor) value (${id},${devsns},'${qrcode}','${moment(
                 startDate
               ).format("YYYY-MM-DD HH:mm:ss")}','${moment(endDate).format(
                 "YYYY-MM-DD HH:mm:ss"
               )}','${usableCount}','${visitor_name}','${tempPwd}','${created_by}','${visipeople}','${moment(
                 startDate
-              ).format("YYYY-MM-DD")}')`;
+              ).format("YYYY-MM-DD")}','${tel_visitor}')`;
               db.query(saveLog, (err, result) => {
                 if (err) {
                   console.log(err);
@@ -58,6 +60,18 @@ exports.createVisitor = async (req, res) => {
                   res.send({
                     status: 200,
                     data: result,
+                    startDate: moment(
+                      startDate
+                    ).format("YYYY-MM-DD HH:mm:ss"),
+                    endDate: moment(
+                      endDate
+                    ).format("YYYY-MM-DD HH:mm:ss"),
+                    usableCount:usableCount,
+                    visitor_name:visitor_name,
+                    visitor_people:visipeople,
+                    tel_visitor:tel_visitor,
+                    qrcode: resdata.data,
+                   
                   });
                 }
               });
@@ -69,6 +83,22 @@ exports.createVisitor = async (req, res) => {
 exports.getVisitor = async (req, res) => {
   let id = req.params.id;
   let get = `select * from visitor_log where company_id = ${id}`;
+  db.query(get, async (err, result) => {
+    if (err) {
+      console.log(err);
+    }
+    if (result) {
+      res.send({
+        status: 200,
+        count: result.length,
+        data: result,
+      });
+    }
+  });
+};
+exports.getVisitorbyUser = async (req, res) => {
+  let id = req.params.id;
+  let get = `select * from visitor_log where created_by = ${id}`;
   db.query(get, async (err, result) => {
     if (err) {
       console.log(err);

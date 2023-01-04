@@ -27,7 +27,43 @@ exports.getDevice = async (req, res) => {
               `${process.env.thinmoo}/devDevice/extapi/list?accessToken=${AccessToken}&extCommunityUuid=${uuid}`
             )
             .then(async (result) => {
-              res.send(result.data);
+              res.send(  result.data);
+            })
+            .catch(function (error) {
+              console.log(error.data);
+            });
+        })
+        .catch(function (error) {
+          console.log(error.data);
+        });
+    }
+  });
+};
+exports.getDeviceuuid = async (req, res) => {
+  let uuid = req.params.uuid;
+  let getbuild = `select g.*,c.* from devicegroup g left outer join company c ON (c.company_id=g.company_id) where g.devicegroup_uuid='${uuid}'`;
+  db.query(getbuild, async (err, result) => {
+    console.log(result)
+    if (err) {
+      res.send(err.data);
+    }
+    if (result.length <= 0) {
+      res.send("มีบางอย่างผิดพลาด");
+    }
+    if (result.length > 0) {
+      let uuid = result[0].company_uuid;
+      await axios
+        .get(
+          `${process.env.thinmoo}/platCompany/extapi/getAccessToken?appId=7ba40b7c8f88492aa8afe5aad19fc0a4&appSecret=7cd85e69b6a18e62985f463fa67c4088`
+        )
+        .then(async (result) => {
+          let AccessToken = result.data.data.accessToken;
+          await axios
+            .get(
+              `${process.env.thinmoo}/devDevice/extapi/list?accessToken=${AccessToken}&extCommunityUuid=${uuid}`
+            )
+            .then(async (result) => {
+              res.send({ data: result.data, lists: result.data.data.list });
             })
             .catch(function (error) {
               console.log(error.data);
@@ -166,7 +202,7 @@ exports.removemanyDevice = async (req, res) => {
                   .post(
                     `${process.env.thinmoo}/devDevice/extapi/delete?accessToken=${key}&devSns=${value}&extCommunityUuid=${uuid}`
                   )
-                  .then((result) => {});
+                  .then((result) => { });
               }
             });
           });
